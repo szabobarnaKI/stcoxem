@@ -1,0 +1,10 @@
+v 3
+d Cox PH model with gamma frailty using the E-M method
+d stcoxem fits a Cox proportional hazards model with gamma-distributed frailty using the Expectation-Maximization method.
+d The E-M method provides significant speed benefit over the Stata built-in stcox command, but preserves accuracy.
+d 
+d Program by Barna Szabó-Söderberg
+d Distribution-Date: 2026.10.10
+f stcoxem.ado
+f stcoxem.sthlp
+e

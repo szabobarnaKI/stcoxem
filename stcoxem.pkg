@@ -1,10 +1,22 @@
 v 3
-d Cox PH model with gamma frailty using the E-M method
-d stcoxem fits a Cox proportional hazards model with gamma-distributed frailty using the Expectation-Maximization method.
-d The E-M method provides significant speed benefit over the Stata built-in stcox command, but preserves accuracy.
-d 
-d Program by Barna Szabó-Söderberg
-d Distribution-Date: 2026.10.10
+d 'STCOXEM': Cox proportional hazards model with shared gamma frailty, fit by the EM algorithm
+d
+d stcoxem fits the Cox model with a shared gamma frailty -- the model of
+d stcox, shared() -- by the EM algorithm of Klein (1992), implemented in
+d Mata for large data (hundreds of thousands of frailty groups). Estimates
+d agree with stcox, shared(). It also allows strata(), vce(robust),
+d vce(cluster), vce(bootstrap), and pweights, and gives a profile-likelihood
+d standard error and confidence interval for the frailty variance. Results
+d are stored as stcox, shared() stores them, so stcox's postestimation
+d commands (predict, estat, stcurve, margins, lrtest, ...) work afterwards.
+d
+d Requires: Stata 19
+d
+d Author: Barna Szabo-Soderberg, Karolinska Institutet
+d Support: https://github.com/szabobarnaKI/stcoxem
+d
+d Distribution-Date: 20261126
 f stcoxem.ado
+f stcoxem_p.ado
 f stcoxem.sthlp
-e
+f stcoxem_postestimation.sthlp

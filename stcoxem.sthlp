@@ -1,118 +1,143 @@
 {smcl}
-{* *! version 1.0.0  28sep2026}{...}
+{* *! version 1.0.0  26nov2026}{...}
+{vieweralsosee "stcoxem postestimation" "help stcoxem_postestimation"}{...}
+{vieweralsosee "" "--"}{...}
+{vieweralsosee "[ST] stcox" "help stcox"}{...}
+{vieweralsosee "[ST] stcox postestimation" "help stcox_postestimation"}{...}
+{vieweralsosee "[ST] stset" "help stset"}{...}
 {viewerjumpto "Syntax" "stcoxem##syntax"}{...}
 {viewerjumpto "Description" "stcoxem##description"}{...}
 {viewerjumpto "Options" "stcoxem##options"}{...}
 {viewerjumpto "Weights" "stcoxem##weights"}{...}
 {viewerjumpto "Remarks" "stcoxem##remarks"}{...}
+{viewerjumpto "Examples" "stcoxem##examples"}{...}
 {viewerjumpto "Stored results" "stcoxem##results"}{...}
 {viewerjumpto "Methods and formulas" "stcoxem##methods"}{...}
 {viewerjumpto "References" "stcoxem##references"}{...}
-{viewerjumpto "Examples" "stcoxem##examples"}{...}
+{viewerjumpto "Author" "stcoxem##author"}{...}
 {title:Title}
 
 {phang}
-{bf:stcoxem} {hline 2} Semiparametric Cox model with shared gamma frailty, fit by the
-Klein (1992) EM algorithm
+{bf:stcoxem} {hline 2} Cox proportional hazards model with shared gamma frailty,
+fit by the EM algorithm
 
 
 {marker syntax}{...}
 {title:Syntax}
 
 {p 8 16 2}
-{cmd:stcoxem} {it:{help varlist:indepvars}} {ifin}{cmd:,} {cmdab:sh:ared(}{it:varname}{cmd:)}
-[{it:options}]
+{cmd:stcoxem} [{varlist}] {ifin}{cmd:,} {opth sh:ared(varname)} [{it:options}]
 
-{synoptset 25 tabbed}{...}
+{synoptset 26 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Model}
-{synopt:{cmdab:sh:ared(}{it:varname}{cmd:)}}variable identifying the shared-frailty
-groups (clusters); {bf:required}{p_end}
-{synopt:{cmdab:str:ata(}{it:varname}{cmd:)}}estimate a separate baseline hazard
-within each level of {it:varname}{p_end}
+{p2coldent:* {opth sh:ared(varname)}}variable identifying the shared-frailty
+groups{p_end}
+{synopt:{opth str:ata(varname)}}stratify on {it:varname}: a separate baseline
+hazard within each stratum{p_end}
+{synopt:{opt forceshared}}allow delayed entry or gaps{p_end}
 
-{syntab:SE/CI}
-{synopt:{cmdab:vce:(}{it:vcetype}{cmd:)}}{it:vcetype} may be {cmd:none} (default),
-{cmd:oim}, {cmd:robust}, or {cmd:bootstrap}{p_end}
-{synopt:{cmd:plci}}report a profile-likelihood confidence interval for {cmd:theta}{p_end}
-{synopt:{cmdab:nopl:se}}suppress the profile-likelihood-based SE for {cmd:theta};
-by default {cmd:plse} runs under {cmd:vce(oim)}/{cmd:vce(robust)} only{p_end}
-{synopt:{cmdab:rep:s(}{it:#}{cmd:)}}number of bootstrap replications; default is
-{cmd:reps(50)}; requires {cmd:vce(bootstrap)}{p_end}
-{synopt:{cmd:bsseed(}{it:#}{cmd:)}}Mata random-number seed for
-{cmd:vce(bootstrap)}{p_end}
-{synopt:{cmd:bswarmstart}}warm-start each bootstrap replicate from the main fit
-instead of cold-starting{p_end}
-{synopt:{cmdab:l:evel(}{it:#}{cmd:)}}set confidence level; default is
-{cmd:level(95)}{p_end}
+{syntab:SE/Robust}
+{synopt:{opth vce(vcetype)}}{it:vcetype} may be {opt oim} (default), {opt r:obust},
+{opt cl:uster} {it:clustvar}, {opt boot:strap}, or {opt none}{p_end}
+{synopt:{opt reps(#)}}number of bootstrap replications; default is
+{cmd:reps(50)}{p_end}
+{synopt:{opt bsseed(#)}}random-number seed for {cmd:vce(bootstrap)}{p_end}
+{synopt:{opt bsw:armstart}}start each bootstrap replication from the
+estimates{p_end}
+{synopt:{opt nopl:se}}report the observed-information standard error of
+theta instead of the profile-likelihood one{p_end}
+{synopt:{opt pl:ci}}report a profile-likelihood confidence interval for
+theta{p_end}
+{synopt:{opt nolr:test}}do not perform the likelihood-ratio test of
+theta=0{p_end}
 
 {syntab:Reporting}
-{synopt:{cmdab:noh:r}}report coefficients instead of hazard ratios{p_end}
-{synopt:{cmdab:nol:og}}suppress the per-iteration EM log{p_end}
-{synopt:{cmd:dots}}show a progress dot per EM iteration instead of the full log{p_end}
+{synopt:{opt level(#)}}set confidence level; default is {cmd:level(95)}{p_end}
+{synopt:{opt nohr}}report coefficients, not hazard ratios{p_end}
+{synopt:{opt nohead:er}}suppress the header{p_end}
+{synopt:{opt nocoef}}suppress the coefficient table{p_end}
+{synopt:{it:{help stcoxem##display_options:display_options}}}control columns
+and column formats, row spacing, line width, and factor-variable
+labeling{p_end}
 
-{syntab:EM algorithm}
-{synopt:{cmdab:maxi:ter(}{it:#}{cmd:)}}maximum EM iterations; default is
-{cmd:maxiter(200)}{p_end}
-{synopt:{cmdab:tol:erance(}{it:#}{cmd:)}}EM convergence tolerance on relative
-parameter change; default is {cmd:tolerance(1e-6)}{p_end}
-{synopt:{cmdab:coxi:ter(}{it:#}{cmd:)}}Newton steps for beta per EM cycle;
-default is {cmd:coxiter(1)}{p_end}
-{synopt:{cmdab:accel:erate(}{it:method}{cmd:)}}EM acceleration: {cmd:squarem}
-(default), {cmd:aitken}, or {cmd:none}{p_end}
-{synopt:{cmdab:noai:tken}}synonym for {cmd:accelerate(none)}{p_end}
+{syntab:Maximization}
+{synopt:{opt max:iter(#)}}maximum number of EM iterations; default is
+{cmd:maxiter(}{ccl maxiter}{cmd:)}{p_end}
+{synopt:{opt tol:erance(#)}}tolerance for the parameters; default is
+{cmd:tolerance(1e-8)}{p_end}
+{synopt:{opt ltol:erance(#)}}tolerance for the log likelihood; default is
+{cmd:ltolerance(1e-7)}{p_end}
+{synopt:{opt cox:iter(#)}}Newton steps for the coefficients per EM
+iteration; default is {cmd:coxiter(1)}{p_end}
+{synopt:{opt accel:erate(method)}}EM acceleration: {opt squarem} (default),
+{opt aitken}, or {opt none}{p_end}
+{synopt:{opt noai:tken}}synonym for {cmd:accelerate(none)}{p_end}
+{synopt:{opt nolo:g}}suppress the iteration log{p_end}
+{synopt:{opt dots}}display one dot per EM iteration instead of the
+log{p_end}
 
-{syntab:Output variables}
-{synopt:{cmdab:gen:erate(}{it:newvar}{cmd:)}}record-level Breslow baseline
-cumulative hazard{p_end}
-{synopt:{cmd:ufrailty(}{it:newvar}{cmd:)}}record-level posterior mean frailty
-E[u|data] for the record's {cmd:shared()} cluster{p_end}
+{syntab:Generated variables}
+{synopt:{opth gen:erate(newvar)}}create {it:newvar} containing the baseline
+cumulative hazard contribution of each record{p_end}
+{synopt:{opth uf:railty(newvar)}}create {it:newvar} containing the estimated
+frailty of each record's group{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}
-{it:indepvars} may contain factor variables; see {help fvvarlist}.{p_end}
+* {opt shared()} is required.{p_end}
 {p 4 6 2}
-{it:indepvars} may be omitted, fitting a frailty-only model with no covariates.{p_end}
+You must {cmd:stset} your data before using {cmd:stcoxem}; see
+{manhelp stset ST}.{p_end}
 {p 4 6 2}
-{cmd:pweight}s are supported but are set on {cmd:stset}, not on {cmd:stcoxem};
-see {help stcoxem##weights:Weights} below.{p_end}
+{it:varlist} may contain factor variables and time-series operators; see
+{help fvvarlist} and {help tsvarlist}. {it:varlist} may be omitted, which fits
+a model with frailty only.{p_end}
 {p 4 6 2}
-The data must already be {cmd:stset}; see {help stset}.{p_end}
+{cmd:pweight}s are specified with {cmd:stset}, not with {cmd:stcoxem}; see
+{help stcoxem##weights:Weights}.{p_end}
+{p 4 6 2}
+See {help stcoxem postestimation} for features available after
+estimation.{p_end}
+
+{p 4 4 2}
+Typing {cmd:stcoxem} without arguments redisplays the last estimates;
+{opt level()}, {opt nohr}, {opt noheader}, {opt nocoef}, and the
+{it:display_options} may be specified.{p_end}
 
 
 {marker description}{...}
 {title:Description}
 
 {pstd}
-{cmd:stcoxem} fits a semiparametric Cox proportional hazards model with a
-shared multiplicative gamma frailty, using the EM algorithm of
-{help stcoxem##KleinRef:Klein (1992)}. Subjects (or higher-level clusters,
-identified by {cmd:shared()}) share an unobserved frailty {cmd:u} that
-multiplies their hazard; {cmd:u} is assumed Gamma-distributed with mean 1 and
-unknown variance {cmd:theta}, which {cmd:stcoxem} estimates jointly with the
-regression coefficients.
+{cmd:stcoxem} fits a Cox proportional hazards model with a shared gamma
+frailty,
+
+{p 8 8 2}
+h(t | x, u) = u h0(t) exp(xb),{space 4}u ~ Gamma(mean 1, variance theta),
 
 {pstd}
-The model is
+in which all records of a group defined by {opt shared()} share one
+unobserved frailty u, and the baseline hazard h0(t) is left unspecified.
+This is the model fit by {cmd:stcox, shared() frailty(gamma)}. {cmd:stcoxem}
+fits it by the expectation-maximization (EM) algorithm of
+{help stcoxem##klein1992:Klein (1992)}, implemented in Mata, instead of the
+penalized partial likelihood used by {cmd:stcox}. The estimates of b, theta,
+the frailties, and the baseline hazard agree with those of {cmd:stcox}; the
+EM algorithm is written for large data (hundreds of thousands of groups),
+where each iteration costs one pass over the risk sets.
 
 {pstd}
-{cmd:h(t | x, u) = u * h0(t) * exp(x'b)},  {cmd:u ~ Gamma(mean 1, variance theta)},
-shared within each {cmd:shared()} group,
+{cmd:stcoxem} also allows what {cmd:stcox} does not allow together with
+{opt shared()}: {opt strata()}, {opt vce(robust)}, {opt vce(cluster)}, and
+{cmd:pweight}s.
 
 {pstd}
-where {cmd:h0(t)} is an unspecified (nonparametric) baseline hazard, estimated
-as a Breslow step function exactly as {helpb stcox} does.
-
-{pstd}
-{cmd:stcoxem} was written as a faster, more stable alternative to
-{cmd:stcox, shared() frailty(gamma)} for very large registry
-data: it implements the E- and M-steps as O(n) risk-set sweeps in Mata, does
-one Newton step for the regression coefficients per EM cycle by default (see
-{opt coxiter()}). The primary reason for developing {cmd:stcoxem} was to 
-obtain point estimates for theta and the mean of the individual cumulative 
-baseline hazards faster, therefore as default it computes no standard errors 
-at all unless requested (see {opt vce()}).
+The results are stored in the layout of {cmd:stcox, shared()}, so
+{cmd:predict}, {cmd:estat}, {cmd:stcurve}, {cmd:margins}, {cmd:test},
+{cmd:lrtest}, and the other postestimation commands of {cmd:stcox} work after
+{cmd:stcoxem}; see {help stcoxem postestimation}.
 
 
 {marker options}{...}
@@ -121,220 +146,375 @@ at all unless requested (see {opt vce()}).
 {dlgtab:Model}
 
 {phang}
-{opt shared(varname)} identifies the shared-frailty groups: records sharing
-the same value of {it:varname} share one common (unobserved) frailty draw.
-{it:varname} may be numeric or string. {cmd:shared()} is required.
+{opth shared(varname)} is required and specifies the variable that defines
+the frailty groups: records with the same value of {it:varname} share one
+frailty. {it:varname} may be numeric or string. Typically it is the subject
+identifier (one frailty per subject, recurrent events) or a cluster such as a
+family or a hospital. Every record of a subject (as set by {cmd:stset}'s
+{opt id()}) should belong to the same group; otherwise a warning is shown, as
+by {cmd:stcox}.
 
 {phang}
-{opt strata(varname)} estimates a separate nonparametric baseline hazard
-within each level of {it:varname} (as {helpb stcox}'s {opt strata()} does).
-{it:varname} may be numeric or string.
-
-{dlgtab:SE/CI}
+{opth strata(varname)} specifies a stratified model: a separate baseline
+hazard is estimated for each level of {it:varname}, while b, theta, and the
+frailties are common. {it:varname} may be numeric or string. Groups may span
+strata. ({cmd:stcox} does not allow {opt strata()} with {opt shared()}.)
 
 {phang}
-{opt vce(vcetype)} selects how (or whether) standard errors are computed.
+{opt forceshared} allows the model to be fit when the data contain delayed
+entry or gaps, which are otherwise refused (error 498), as by {cmd:stcox}; see
+{help st_forceshared}. The results are then consistent only under the
+assumption that the frailty distribution is independent of the covariates and
+the truncation points. Multiple records per subject without gaps (for example,
+after {cmd:stsplit}) are not delayed entry.
+
+{dlgtab:SE/Robust}
+
+{phang}
+{opt vce(vcetype)} specifies how the standard errors of the coefficients are
+computed.
 
 {phang2}
-{cmd:vce(none)}, the default, computes point estimates only. No standard
-errors, z statistics, p-values, or confidence intervals are available, and
-{cmd:e(V)} is not returned. This is the fastest option and is recommended
-for large-scale production runs (see {help stcoxem##remarks:Remarks}). Under
-{cmd:vce(none)}, {opt plse} does not run by default either, since there is
-no {cmd:e(se_theta)} for it to feed.
+{cmd:vce(oim)}, the default, uses the observed information of b and theta
+together, obtained from the EM algorithm by the method of
+{help stcoxem##louis1982:Louis (1982)}. The standard errors of the
+coefficients agree closely with those of {cmd:stcox, shared()} (within a few
+percent).
 
 {phang2}
-{cmd:vce(oim)} reports model-based standard errors for both the regression
-coefficients and {cmd:theta}, from a joint Louis (1982) EM-information
-correction. Beta's SE matches {cmd:stcox}'s closely; {cmd:theta}'s analytic
-SE is a known, understood ~13-20% underestimate relative to {cmd:stcox},
-bootstrap, or R's {cmd:frailtyEM} (a semiparametric-information deficit --
-see {help stcoxem##remarks:Remarks} and
-{help stcoxem##methods:Methods and formulas}), which is why {opt plse} runs
-by default alongside {cmd:vce(oim)} and is what {cmd:e(se_theta)} reports.
+{cmd:vce(robust)} uses the robust (sandwich) estimator of
+{help stcoxem##linwei1989:Lin and Wei (1989)} for the coefficients,
+clustered on the {opt shared()} groups, at the fitted frailties, with the
+small-sample factor G/(G-1). It equals the cluster-robust variance of
+{cmd:stcox, vce(cluster} {it:shared_var}{cmd:)} with ln(u) as an offset.
 
 {phang2}
-{cmd:vce(robust)} reports a cluster-robust (Lin & Wei 1989) sandwich SE for
-the regression coefficients, clustered on {cmd:shared()}; {cmd:theta}'s SE
-is the same joint Louis-correction value as {cmd:vce(oim)}, and {opt plse}
-runs by default here too, feeding {cmd:e(se_theta)} exactly as it does under
-{cmd:vce(oim)}.
+{cmd:vce(cluster} {it:clustvar}{cmd:)} is the same with clusters defined by
+{it:clustvar}. Every {opt shared()} group must lie within one cluster.
+{cmd:vce(robust)} is {cmd:vce(cluster} {it:shared_var}{cmd:)}.
 
 {phang2}
-{cmd:vce(bootstrap)} reports nonparametric cluster-bootstrap standard errors
-(resampling whole {cmd:shared()} clusters with replacement, each resampled
-copy assigned a fresh cluster id) for both the coefficients and {cmd:theta}.
-See {opt reps()}, {opt bsseed()}, and {opt bswarmstart}.
+{cmd:vce(bootstrap)} resamples whole {opt shared()} groups with replacement
+({opt reps()} times; each copy of a group is a new group) and refits the
+model; the standard errors of b and theta are the standard deviations of the
+replicates.
+
+{phang2}
+{cmd:vce(none)} computes no standard errors: no {cmd:e(V)}, no Wald test, no
+standard error of theta. This is the fastest fit and is meant for runs that
+need only the point estimates (b, theta, {cmd:e(H0mean)}).
+
+{pmore}
+Under {cmd:vce(robust)} and {cmd:vce(cluster)}, theta's standard error is
+model based (see {opt noplse}); the model-based variance of b is stored in
+{cmd:e(V_modelbased)}.
 
 {phang}
-{opt plci} additionally reports a profile-likelihood confidence interval for
-{cmd:theta}, obtained by refitting the model at a grid of fixed {cmd:theta}
-values and inverting the likelihood-ratio test. This is independent of
-{opt vce()} and does not rely on the Louis decomposition. It is
-substantially more expensive than a single fit, since each bound search is
-several full EM refits.
+{opt reps(#)} specifies the number of bootstrap replications; the default is
+{cmd:reps(50)}, the minimum 2. Replications that do not converge are dropped
+and counted in {cmd:e(boot_reps_maxiter)}.
 
 {phang}
-{opt noplse} suppresses the profile-likelihood-based standard error for
-{cmd:theta} ({cmd:plse}). By default, {cmd:plse} runs automatically under
-{cmd:vce(oim)} and {cmd:vce(robust)} -- where it is what {cmd:e(se_theta)}
-reports -- but not under {cmd:vce(none)} or {cmd:vce(bootstrap)}, where there
-is no {cmd:e(se_theta)} for it to feed and running it would only cost time
-for no displayed benefit. {cmd:plse} evaluates the profile log-likelihood in
-{cmd:theta} at five points (two step sizes, Richardson-extrapolated) and is
-noticeably more expensive than a plain fit; specify {opt noplse} under
-{cmd:vce(oim)}/{cmd:vce(robust)} for maximum speed when {cmd:theta}'s
-profile-likelihood SE is not needed (the analytic Louis/EM SE remains
-available in {cmd:e(se_theta_oim)} either way). See
-{help stcoxem##remarks:Remarks}.
+{opt bsseed(#)} sets the Mata random-number seed for {cmd:vce(bootstrap)}, so
+that the replications can be reproduced.
 
 {phang}
-{opt reps(#)} sets the number of bootstrap replications for
-{cmd:vce(bootstrap)}; the default is {cmd:reps(50)}, and {it:#} must be at
-least 2.
+{opt bswarmstart} starts each bootstrap replication from the estimates
+instead of from b=0, theta=0.5. It is faster, but when theta is near 0 a
+replication may stop at a spurious solution with a large theta, inflating
+the standard error of theta; the default cold start avoids this.
 
 {phang}
-{opt bsseed(#)} sets the Mata random-number seed (via {cmd:rseed()}) used to
-draw the bootstrap resamples, for reproducibility. If omitted, the ambient
-Mata random-number state is used.
+{opt noplse} specifies that the standard error of theta be the
+observed-information (Louis) value. By default, under {cmd:vce(oim)},
+{cmd:vce(robust)}, and {cmd:vce(cluster)}, the standard error of theta is
+obtained from the curvature of the profile log likelihood of theta, which
+requires five additional fits with theta held fixed. The observed-information
+standard error of theta is too small, typically by 10% to 20%, because it
+treats the baseline hazard as known (see
+{help stcoxem##methods:Methods and formulas}); the profile-likelihood value
+agrees with {cmd:stcox, shared()}. Both are stored, in {cmd:e(se_theta)} and
+{cmd:e(se_theta_oim)}; {cmd:e(se_theta_source)} records which one
+{cmd:e(se_theta)} holds. The standard errors of b are not affected. Under
+{cmd:vce(bootstrap)} the standard error of theta is the bootstrap one, and
+under {cmd:vce(none)} there is none.
 
 {phang}
-{opt bswarmstart} warm-starts every bootstrap replicate's EM iterations from
-the main fit's converged coefficients and {cmd:theta}, instead of the
-default cold start ({cmd:beta=0}, {cmd:theta=0.5}). Warm-starting is faster
-but can bias {cmd:theta}'s bootstrap SE upward if a resample's true
-{cmd:theta} is near zero (the warm start can pull a resample toward a
-spurious high-{cmd:theta} fixed point); compare against the cold-started
-default if results look implausible.
+{opt plci} adds a profile-likelihood confidence interval for theta, at the
+{opt level()} of the fit, found by refitting the model at fixed values of
+theta and inverting the likelihood-ratio test. It is shown in the theta row
+of the table and stored in {cmd:e(theta_pl_lower)} and
+{cmd:e(theta_pl_upper)}. It requires many refits.
 
 {phang}
-{opt level(#)}; see {help level:{it:[R] level}}.
+{opt nolrtest} suppresses the likelihood-ratio test of theta=0, which
+otherwise requires fitting the Cox model without frailty.
 
 {dlgtab:Reporting}
 
 {phang}
-{opt nohr} reports the estimated coefficients on the linear-predictor scale
-instead of the default hazard-ratio (exponentiated) scale. {cmd:theta} is
-never exponentiated, regardless of {opt nohr}.
+{opt level(#)}; see {helpb estimation options##level():[R] Estimation options}.
 
 {phang}
-{opt nolog} suppresses the per-iteration EM log (the default display shows
-one line per EM iteration with the log-likelihood and current {cmd:theta}).
+{opt nohr} reports the coefficients b rather than the hazard ratios exp(b).
+This option affects only how results are displayed. Theta is never
+exponentiated.
 
 {phang}
-{opt dots} shows a single progress dot per EM iteration instead of the full
-per-iteration log. {opt nolog} and {opt dots} may not be combined.
+{opt noheader} suppresses the header above the coefficient table.
 
-{dlgtab:EM algorithm}
+{phang}
+{opt nocoef} suppresses the coefficient table.
+
+{marker display_options}{...}
+{phang}
+{it:display_options}:
+{opt noci},
+{opt nopv:alues},
+{opt noomit:ted},
+{opt vsquish},
+{opt noempty:cells},
+{opt base:levels},
+{opt allbase:levels},
+{opt nofvlab:el},
+{opt fvwrap(#)},
+{opt fvwrapon(style)},
+{opth cformat(%fmt)},
+{opt pformat(%fmt)},
+{opt sformat(%fmt)}, and
+{opt nolstretch};
+see {helpb estimation options##display_options:[R] Estimation options}.
+
+{dlgtab:Maximization}
 
 {phang}
 {opt maxiter(#)} sets the maximum number of EM iterations; the default is
-{cmd:maxiter(200)}. {cmd:e(converged)} reports whether the algorithm
-actually converged (relative parameter change below {opt tolerance()})
-before hitting this limit.
+the current value of {cmd:set maxiter} ({cmd:c(maxiter)}, 300 unless reset),
+as for {cmd:stcox}'s {opt iterate()}; see {helpb set maxiter}. If it is
+reached, {cmd:e(converged)} is 0 and a warning is shown. EM converges
+linearly, so slowly converging data (for example, delayed entry with a small
+theta) may need a larger value.
 
 {phang}
-{opt tolerance(#)} sets the EM convergence criterion: iteration stops once
-the largest relative change in {cmd:theta} and every regression coefficient,
-between consecutive EM iterations, falls below {it:#}. The default is
-{cmd:tolerance(1e-6)}.
+{opt tolerance(#)} and {opt ltolerance(#)} set the convergence criteria. The
+EM iterations stop when the largest relative change in the parameters (b and
+theta), |new-old|/(|old|+1), is below {opt tolerance()} and the relative
+change in the log likelihood, |new-old|/(|old|+1), is below
+{opt ltolerance()}. The defaults are {cmd:tolerance(1e-8)} and
+{cmd:ltolerance(1e-7)}. The parameter tolerance is tighter than {cmd:stcox}'s
+because EM converges linearly: with a looser tolerance it stops measurably
+short of the maximum.
 
 {phang}
-{opt coxiter(#)} sets the number of Newton steps taken for the regression
-coefficients within each EM cycle's M-step; the default, {cmd:coxiter(1)},
-takes a single step. Increasing {opt coxiter()} does not change the fitted
-model -- {cmd:stcoxem} converges to the same fixed point regardless of
-{opt coxiter()}, confirmed to floating-point precision when compared at
-matching {opt tolerance()} -- but can reduce the number of EM iterations
-needed to reach a very tight {opt tolerance()}.
+{opt coxiter(#)} sets the number of Newton steps for b within each EM
+iteration; the default is {cmd:coxiter(1)}. The solution does not depend on
+{opt coxiter()}; more steps may reduce the number of EM iterations.
 
 {phang}
-{opt accelerate(method)} selects the EM acceleration scheme. {cmd:squarem}
-(Varadhan and Roland 2008), the default, and {cmd:aitken} (Aitken's
-Delta-squared) both extrapolate past several raw EM steps to their implied
-fixed point, guarded against numerically unstable jumps; {cmd:none} runs
-plain, unaccelerated EM. Acceleration changes only how many iterations are
-needed, never the converged answer.
+{opt accelerate(method)} specifies the EM acceleration:
+{opt squarem} ({help stcoxem##varadhan2008:Varadhan and Roland 2008}; the
+default), {opt aitken} (Aitken's delta-squared extrapolation), or {opt none}
+(plain EM). Acceleration changes the number of iterations, not the solution.
 
 {phang}
-{opt noaitken} is a synonym for {opt accelerate(none)}, retained for
-backward compatibility.
-
-{dlgtab:Output variables}
+{opt noaitken} is a synonym for {cmd:accelerate(none)}.
 
 {phang}
-{opt generate(newvar)} creates {it:newvar} holding each record's Breslow
-baseline cumulative hazard, {cmd:H0(t) - H0(t0)}, on the estimation sample.
+{opt nolog} suppresses the iteration log, which shows the log likelihood and
+theta at each EM iteration.
 
 {phang}
-{opt ufrailty(newvar)} creates {it:newvar} holding each record's posterior
-mean frailty, {cmd:E[u | data]}, for the record's {cmd:shared()} cluster
-(constant within cluster). This is comparable to {cmd:stcox}'s
-{cmd:predict, effects}.
+{opt dots} displays one dot per EM iteration instead of the iteration log.
+{opt dots} may not be combined with {opt nolog}.
+
+{dlgtab:Generated variables}
+
+{phang}
+{opth generate(newvar)} creates {it:newvar} containing, for each record in
+the estimation sample, the increase of the baseline cumulative hazard over
+the record's interval, H0(_t) - H0(_t0), at x=0 and u=1. Summed over a
+subject's records it is the subject's baseline cumulative hazard; see also
+{cmd:predict, basechazard}.
+
+{phang}
+{opth ufrailty(newvar)} creates {it:newvar} containing the estimated frailty
+of each record's group, the posterior mean E(u | data). Its logarithm is
+what {cmd:predict, effects} returns after {cmd:stcoxem}.
 
 
 {marker weights}{...}
 {title:Weights}
 
 {pstd}
-{cmd:stcoxem} supports {help pweight}s, but -- unlike most Stata
-estimation commands -- the weight is specified when the data are
-{cmd:stset}, not in {cmd:stcoxem}'s own syntax:
+{cmd:pweight}s are specified when the data are {cmd:stset},
 
-{phang2}{cmd:. stset timevar [pweight=wtvar], ...}{p_end}
-{phang2}{cmd:. stcoxem ..., shared(id) ...}{p_end}
+{phang2}{cmd:. stset time [pweight=wvar], failure(died) id(id)}{p_end}
 
 {pstd}
-{cmd:stcoxem} reads the weight {help stset} recorded and reports which
-weight (if any) it used at the top of the output. Only {cmd:pweight} is
-supported; {cmd:stset} with any other weight type raises an error.
+and {cmd:stcoxem} uses them; other weight types are not allowed.
 
 {pstd}
-A {cmd:pweight} is interpreted at the {cmd:shared()}-cluster level: a
-cluster whose records carry a constant weight {cmd:k} is treated as {cmd:k}
-independent replicate copies of that cluster for the frailty likelihood
-(matching what you would get by literally replicating the cluster {cmd:k}
-times, each copy with its own frailty draw). A weight that varies within a
-cluster is handled via the cluster's mean weight.
+A weight k is applied to the group: a group whose records have weight k
+contributes as k independent copies of the group, each with its own frailty.
+Thus integer weights give the same estimates as the data expanded k times
+with a new group identifier for each copy. If the weight varies within a
+group, the group's mean weight is used for the frailty part of the
+likelihood. ({cmd:stcox} does not allow {cmd:pweight}s with
+{opt shared()}.)
+
+{pstd}
+Under {cmd:vce(oim)}, the standard errors are those of the expanded data
+(copies treated as independent groups). For sampling weights, specify
+{cmd:vce(robust)} or {cmd:vce(cluster)}, which give the usual sampling-weight
+sandwich estimator.
 
 
 {marker remarks}{...}
 {title:Remarks}
 
 {pstd}
-{opt plse} runs automatically under {cmd:vce(oim)} and {cmd:vce(robust)},
-because it is what {cmd:e(se_theta)} reports under those settings, and is
-skipped by default under {cmd:vce(none)} and {cmd:vce(bootstrap)}, where
-there is no {cmd:e(se_theta)} for it to feed. If you are running
-{cmd:vce(oim)}/{cmd:vce(robust)} but do not need {cmd:theta}'s
-profile-likelihood SE, specify {opt noplse} to skip this extra computation
-and get a faster fit (the analytic Louis/EM SE remains available in
-{cmd:e(se_theta_oim)}):
+Remarks are presented under the following headings:
 
-{phang2}{cmd:. stcoxem ..., shared(id) vce(oim) noplse}{p_end}
+{phang2}{help stcoxem##rem_stcox:Relation to stcox, shared()}{p_end}
+{phang2}{help stcoxem##rem_speed:Large data}{p_end}
+{phang2}{help stcoxem##rem_theta:Standard error of theta}{p_end}
+{phang2}{help stcoxem##rem_ll:Log likelihood and tests}{p_end}
+{phang2}{help stcoxem##rem_h0:Baseline hazard and e(H0mean)}{p_end}
+{phang2}{help stcoxem##rem_other:Other remarks}{p_end}
 
-{pstd}
-For large datasets and with the only goal of obtaining point estimates, 
-{cmd:vce(none)} provides a fast fit with no SE of any kind computed and 
-{opt plse} already does not run, so no extra option is needed for the fastest 
-possible fit:
-
-{phang2}{cmd:. stcoxem ..., shared(id) vce(none)}{p_end}
+{marker rem_stcox}{...}
+{title:Relation to stcox, shared()}
 
 {pstd}
-For very large numbers of records or clusters, fit progress can be tracked
-with {opt dots} without the volume of a full per-iteration log, or
-suppressed entirely with {opt nolog}.
+{cmd:stcoxem} and {cmd:stcox, shared(}{it:id}{cmd:)} (which uses Breslow ties
+by default) estimate the same model and give the same estimates up to the
+convergence tolerance: b and theta to 5 or 6 significant digits, the
+frailties and the baseline cumulative hazard to about 1e-5, and the log
+likelihood {cmd:e(ll)}. Ties are always handled by the Breslow method.
 
 {pstd}
-{cmd:stcoxem} does not implement a {helpb predict} command. Per-record
-quantities are instead obtained directly through {opt generate()} (baseline
-cumulative hazard) and {opt ufrailty()} (posterior mean frailty).
+The results are stored as {cmd:stcox, shared()} stores them ({cmd:e(cmd)} is
+{cmd:stcox_fr}, {cmd:e(cmd2)} is {cmd:stcox}). {cmd:e(estimator)} is
+{cmd:em} and {cmd:e(cmdline)} begins with {cmd:stcoxem}, which identifies
+{cmd:stcoxem}'s results. Typing {cmd:stcoxem} redisplays them in
+{cmd:stcoxem}'s format; typing {cmd:stcox} redisplays them in {cmd:stcox}'s.
+
+{marker rem_speed}{...}
+{title:Large data}
 
 {pstd}
-Time-varying covariates and counting-process (multiple-record) data are
-supported directly through {cmd:stset}'s usual enter()/exit()/id() syntax;
-{cmd:stcoxem} does not split records for you.
+For runs that need only the estimates, specify {cmd:vce(none)}: the
+standard errors, the five profile-likelihood fits for theta, and (with
+{opt nolrtest}) the comparison Cox model are then skipped.
+
+{phang2}{cmd:. stcoxem i.drug age, shared(id) vce(none) nolrtest nolog}{p_end}
+
+{pstd}
+Postestimation statistics that refit the model (for example,
+{cmd:predict, mgale} or {cmd:basechazard}) use {cmd:stcox}'s own code, which
+for unweighted fits re-solves {cmd:stcox}'s penalized likelihood with one
+parameter per group. With very many groups this can be slow; see
+{help stcoxem postestimation}.
+
+{marker rem_theta}{...}
+{title:Standard error of theta}
+
+{pstd}
+The default standard error of theta is computed from the profile log
+likelihood (see {opt noplse}) and agrees with {cmd:stcox, shared()}. The
+observed-information value ({cmd:e(se_theta_oim)}, or {cmd:e(se_theta)} with
+{opt noplse}) is too small. For a confidence interval for theta that does not
+rely on normality, use {opt plci}; theta is bounded at 0, and its sampling
+distribution is skewed when it is small.
+
+{marker rem_ll}{...}
+{title:Log likelihood and tests}
+
+{pstd}
+{cmd:e(ll)} is the marginal log likelihood on the scale of
+{cmd:stcox, shared()} (with the baseline hazard profiled out, Breslow), so
+{cmd:lrtest} and {cmd:estat ic} can compare {cmd:stcoxem} models with each
+other and with {cmd:stcox} models fit on the same sample. The
+likelihood-ratio test of theta=0 compares the model with the Cox model
+without frailty ({cmd:e(ll_c)}); because theta=0 is on the boundary, the
+statistic is distributed as a 50:50 mixture of chi2(0) and chi2(1)
+(chibar2(01)), as in {cmd:stcox}.
+
+{pstd}
+The Wald test in the header ({cmd:e(chi2)}) tests all coefficients; it is
+not computed under {cmd:vce(none)}.
+
+{marker rem_h0}{...}
+{title:Baseline hazard and e(H0mean)}
+
+{pstd}
+The baseline hazard is the Breslow estimator at x=0 and u=1, as in
+{cmd:stcox}. {cmd:e(H0mean)} is the mean over subjects of the baseline
+cumulative hazard accumulated over each subject's follow-up (the sum of
+{opt generate()} over a subject's records), with subjects defined by
+{cmd:stset}'s {opt id()} (each record is a subject if {opt id()} was not
+set). The covariates are centred internally, so the fit itself is not
+affected by their location, but the baseline is reported at x=0: if x=0 is
+far outside the data (for example, a year of birth), the baseline can
+overflow and {cmd:e(H0mean)} is missing. Centre such covariates near 0
+before fitting.
+
+{marker rem_other}{...}
+{title:Other remarks}
+
+{pstd}
+Covariates that are collinear (or constant) are omitted, with a note, and
+appear with the {cmd:o.} prefix in {cmd:e(b)}, as with {cmd:stcox}.
+
+{pstd}
+Multiple-record data are handled through {cmd:stset} as usual; delayed entry
+and gaps require {opt forceshared}, as with {cmd:stcox}. Time-varying covariates must be created by splitting
+the records (for example, with {cmd:stsplit}); {cmd:stcoxem} has no
+{opt tvc()} option.
+
+{pstd}
+Starting values are b=0 and theta=0.5. When the data contain little frailty
+variation, theta approaches 0 and EM converges slowly; check
+{cmd:e(converged)}.
+
+
+{marker examples}{...}
+{title:Examples}
+
+{pstd}Setup{p_end}
+{phang2}{cmd:. webuse catheter}{p_end}
+{phang2}{cmd:. stset time, failure(infect)}{p_end}
+
+{pstd}Gamma shared frailty on patient{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient)}{p_end}
+
+{pstd}The same model by {cmd:stcox}{p_end}
+{phang2}{cmd:. stcox age female, shared(patient)}{p_end}
+
+{pstd}Coefficients instead of hazard ratios; replay{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient) nolog}{p_end}
+{phang2}{cmd:. stcoxem, nohr}{p_end}
+
+{pstd}Robust standard errors and a profile-likelihood CI for theta{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient) vce(robust) plci}{p_end}
+
+{pstd}Stratified baseline hazard{p_end}
+{phang2}{cmd:. stcoxem age, shared(patient) strata(female)}{p_end}
+
+{pstd}Bootstrap standard errors{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient) vce(bootstrap) reps(200) bsseed(12345)}{p_end}
+
+{pstd}Estimates only, for large data{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient) vce(none) nolrtest nolog}{p_end}
+
+{pstd}Frailties and baseline cumulative hazard{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient) ufrailty(u) generate(dH0)}{p_end}
+{phang2}{cmd:. predict nu, effects}{p_end}
+
+{pstd}Sampling weights (set with {cmd:stset}){p_end}
+{phang2}{cmd:. generate w = 1 + (age > 45)}{p_end}
+{phang2}{cmd:. stset time [pweight=w], failure(infect)}{p_end}
+{phang2}{cmd:. stcoxem age female, shared(patient) vce(robust)}{p_end}
 
 
 {marker results}{...}
@@ -343,85 +523,112 @@ supported directly through {cmd:stset}'s usual enter()/exit()/id() syntax;
 {pstd}
 {cmd:stcoxem} stores the following in {cmd:e()}:
 
-{synoptset 20 tabbed}{...}
-{p2col 5 20 24 2: Scalars}{p_end}
-{synopt:{cmd:e(N_orig)}}number of records used{p_end}
-{synopt:{cmd:e(N_clust)}}number of {cmd:shared()} clusters{p_end}
-{synopt:{cmd:e(N_subj)}}number of subjects (from {cmd:stset}'s {cmd:id()}, or
-equal to {cmd:e(N_orig)} if none was set){p_end}
-{synopt:{cmd:e(n_strata)}}number of strata{p_end}
-{synopt:{cmd:e(theta)}}estimated frailty variance{p_end}
-{synopt:{cmd:e(se_theta)}}SE of {cmd:theta} (from {cmd:plse} if it ran and
-converged reliably, else the analytic Louis/EM value); {cmd:vce(oim)} or
-{cmd:vce(robust)} only{p_end}
-{synopt:{cmd:e(se_theta_oim)}}the analytic Louis/EM SE of {cmd:theta},
-always available alongside {cmd:e(se_theta)}; {cmd:vce(oim)}/{cmd:vce(robust)}
-only{p_end}
-{synopt:{cmd:e(se_theta_profile)}}profile-likelihood-based SE of
-{cmd:theta}, missing if it did not compute reliably; present whenever
-{opt plse} ran, which by default is under {cmd:vce(oim)}/{cmd:vce(robust)}
-(unless {opt noplse} was given){p_end}
-{synopt:{cmd:e(theta_profile_nonconv)}}number of the 5 internal profile
-refits (out of 5) that did not converge within {opt maxiter()}; present
-whenever {opt plse} ran{p_end}
-{synopt:{cmd:e(se_theta_naive)}}{cmd:theta}'s SE ignoring beta/theta
-coupling (diagnostic); {cmd:vce(oim)}/{cmd:vce(robust)} with covariates only{p_end}
-{synopt:{cmd:e(schur_term)}}the beta/theta Schur-complement coupling term
-(diagnostic); {cmd:vce(oim)}/{cmd:vce(robust)} with covariates only{p_end}
-{synopt:{cmd:e(ll)}}Cox partial log-likelihood plus frailty terms, correct
-up to an additive tie-pattern constant -- valid for comparisons within the
-same model (e.g. across {opt plci()} refits) but not for cross-model
-LR/AIC comparisons{p_end}
-{synopt:{cmd:e(H0mean)}}mean cumulative baseline hazard across subjects{p_end}
-{synopt:{cmd:e(iter)}}number of EM iterations run{p_end}
-{synopt:{cmd:e(converged)}}1 if the EM algorithm converged, 0 if it stopped
-at {opt maxiter()}{p_end}
-{synopt:{cmd:e(mem_est)}}a lower-bound estimate (MB) of the fit's memory
-footprint; not a measurement of true peak memory{p_end}
-{synopt:{cmd:e(theta_pl_lower)}, {cmd:e(theta_pl_upper)}}profile-likelihood
-CI bounds for {cmd:theta}; {opt plci} only{p_end}
-{synopt:{cmd:e(theta_pl_nonconv)}}number of profile refits during the
-{opt plci} bound search that did not converge{p_end}
-{synopt:{cmd:e(aitken_theta_att)}, {cmd:e(aitken_theta_acc)}}Aitken
-acceleration theta-jump attempted/accepted counts; {opt accelerate(aitken)}
-only{p_end}
-{synopt:{cmd:e(aitken_beta_att)}, {cmd:e(aitken_beta_acc)}}Aitken
-acceleration beta-jump attempted/accepted counts; {opt accelerate(aitken)}
-with covariates only{p_end}
-{synopt:{cmd:e(squarem_att)}, {cmd:e(squarem_acc)}}SQUAREM acceleration
-attempted/accepted counts; default {opt accelerate(squarem)} only{p_end}
-{synopt:{cmd:e(boot_reps)}}requested number of bootstrap replications{p_end}
-{synopt:{cmd:e(boot_reps_used)}}number of replications that converged to a
-usable estimate{p_end}
-{synopt:{cmd:e(boot_reps_maxiter)}}number of replications that hit
-{opt maxiter()} without converging{p_end}
-{synopt:{cmd:e(boot_reps_badtheta)}, {cmd:e(boot_reps_badbeta)}}number of
-replications with a non-finite {cmd:theta} or coefficient{p_end}
-{synopt:{cmd:e(boot_avg_iter)}}average EM iterations per bootstrap
-replicate{p_end}
+{synoptset 24 tabbed}{...}
+{p2col 5 24 28 2: Scalars}{p_end}
+{synopt:{cmd:e(N)}}number of observations{p_end}
+{synopt:{cmd:e(N_sub)}}number of subjects{p_end}
+{synopt:{cmd:e(N_fail)}}number of failures{p_end}
+{synopt:{cmd:e(risk)}}total time at risk{p_end}
+{synopt:{cmd:e(N_g)}}number of groups{p_end}
+{synopt:{cmd:e(g_min)}}smallest group size (records){p_end}
+{synopt:{cmd:e(g_avg)}}average group size{p_end}
+{synopt:{cmd:e(g_max)}}largest group size{p_end}
+{synopt:{cmd:e(N_strata)}}number of strata ({opt strata()} only){p_end}
+{synopt:{cmd:e(N_clust)}}number of clusters ({cmd:vce(robust)},
+{cmd:vce(cluster)}){p_end}
+{synopt:{cmd:e(df_m)}}model degrees of freedom{p_end}
+{synopt:{cmd:e(rank)}}rank of {cmd:e(V)}{p_end}
+{synopt:{cmd:e(chi2)}}Wald chi-squared{p_end}
+{synopt:{cmd:e(ll)}}log likelihood{p_end}
+{synopt:{cmd:e(ll_c)}}log likelihood, Cox model without frailty{p_end}
+{synopt:{cmd:e(chi2_c)}}chi-squared, LR test of theta=0{p_end}
+{synopt:{cmd:e(p_c)}}p-value, LR test of theta=0{p_end}
+{synopt:{cmd:e(theta)}}frailty variance theta{p_end}
+{synopt:{cmd:e(se_theta)}}standard error of theta{p_end}
+{synopt:{cmd:e(se_theta_oim)}}observed-information standard error of
+theta{p_end}
+{synopt:{cmd:e(se_theta_profile)}}profile-likelihood standard error of theta
+(missing if it could not be computed){p_end}
+{synopt:{cmd:e(theta_profile_nonconv)}}number of the five profile fits that
+did not converge{p_end}
+{synopt:{cmd:e(se_theta_naive)}}standard error of theta ignoring its
+correlation with b (diagnostic){p_end}
+{synopt:{cmd:e(schur_term)}}b-theta coupling term (diagnostic){p_end}
+{synopt:{cmd:e(theta_pl_lower)}}lower profile-likelihood confidence limit for
+theta ({opt plci}){p_end}
+{synopt:{cmd:e(theta_pl_upper)}}upper profile-likelihood confidence limit for
+theta ({opt plci}){p_end}
+{synopt:{cmd:e(theta_pl_nonconv)}}number of {opt plci} fits that did not
+converge{p_end}
+{synopt:{cmd:e(H0mean)}}mean baseline cumulative hazard over subjects{p_end}
+{synopt:{cmd:e(converged)}}{cmd:1} if converged, {cmd:0} otherwise{p_end}
+{synopt:{cmd:e(iter)}}number of EM iterations{p_end}
+{synopt:{cmd:e(tolerance)}}parameter tolerance{p_end}
+{synopt:{cmd:e(ltolerance)}}log-likelihood tolerance{p_end}
+{synopt:{cmd:e(mem_est)}}estimated memory use (MB; lower bound){p_end}
+{synopt:{cmd:e(squarem_att)}, {cmd:e(squarem_acc)}}SQUAREM steps attempted
+and accepted{p_end}
+{synopt:{cmd:e(aitken_theta_att)}, {cmd:e(aitken_theta_acc)}}Aitken steps
+for theta attempted and accepted{p_end}
+{synopt:{cmd:e(aitken_beta_att)}, {cmd:e(aitken_beta_acc)}}Aitken steps for
+b attempted and accepted{p_end}
+{synopt:{cmd:e(N_reps)}}number of bootstrap replications used{p_end}
+{synopt:{cmd:e(boot_reps)}}number of bootstrap replications requested{p_end}
+{synopt:{cmd:e(boot_reps_used)}}number of replications used{p_end}
+{synopt:{cmd:e(boot_reps_maxiter)}}number of replications that did not
+converge{p_end}
+{synopt:{cmd:e(boot_reps_badtheta)}}number of replications with invalid
+theta{p_end}
+{synopt:{cmd:e(boot_reps_badbeta)}}number of replications with invalid
+b{p_end}
+{synopt:{cmd:e(boot_avg_iter)}}average EM iterations per replication{p_end}
 
-{p2col 5 20 24 2: Macros}{p_end}
-{synopt:{cmd:e(cmd)}}{cmd:stcoxem}{p_end}
+{synoptset 24 tabbed}{...}
+{p2col 5 24 28 2: Macros}{p_end}
+{synopt:{cmd:e(cmd)}}{cmd:stcox_fr}{p_end}
+{synopt:{cmd:e(cmd2)}}{cmd:stcox}{p_end}
+{synopt:{cmd:e(estimator)}}{cmd:em}{p_end}
+{synopt:{cmd:e(cmdline)}}command as typed{p_end}
 {synopt:{cmd:e(depvar)}}{cmd:_t}{p_end}
-{synopt:{cmd:e(title)}}title of the estimation command{p_end}
-{synopt:{cmd:e(sharedvar)}}variable given to {opt shared()}{p_end}
-{synopt:{cmd:e(stratavar)}}variable given to {opt strata()}, if any{p_end}
-{synopt:{cmd:e(wexp)}}the weight variable read from {cmd:stset}, if any{p_end}
-{synopt:{cmd:e(vce)}}{it:vcetype} given to {opt vce()}{p_end}
-{synopt:{cmd:e(se_theta_source)}}{cmd:plse} or an {cmd:oim} fallback note,
-describing what {cmd:e(se_theta)} reports; {cmd:vce(oim)}/{cmd:vce(robust)}
-only{p_end}
-{synopt:{cmd:e(accelerate)}}acceleration method used{p_end}
+{synopt:{cmd:e(t0)}}{cmd:_t0}{p_end}
+{synopt:{cmd:e(shared)}}frailty grouping variable{p_end}
+{synopt:{cmd:e(strata)}}stratification variable{p_end}
+{synopt:{cmd:e(method)}}{cmd:breslow}{p_end}
+{synopt:{cmd:e(ties)}}{cmd:breslow}{p_end}
+{synopt:{cmd:e(wtype)}}weight type ({cmd:pweight}){p_end}
+{synopt:{cmd:e(wexp)}}weight expression{p_end}
+{synopt:{cmd:e(clustvar)}}name of cluster variable{p_end}
+{synopt:{cmd:e(vce)}}{it:vcetype} specified in {cmd:vce()}{p_end}
+{synopt:{cmd:e(vcetype)}}title used to label Std. err.{p_end}
+{synopt:{cmd:e(se_theta_source)}}source of {cmd:e(se_theta)}: {cmd:plse},
+{cmd:oim ...}, or {cmd:bootstrap}{p_end}
+{synopt:{cmd:e(chi2type)}}{cmd:Wald}{p_end}
+{synopt:{cmd:e(accelerate)}}EM acceleration method{p_end}
+{synopt:{cmd:e(boot_start)}}{cmd:cold} or {cmd:warm} ({cmd:vce(bootstrap)}){p_end}
+{synopt:{cmd:e(sh_warn)}}{cmd:sh_warn} if subjects span frailty groups{p_end}
+{synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
+{synopt:{cmd:e(predict)}}program used to implement {cmd:predict}:
+{cmd:stcox_p}, or {cmd:stcoxem_p} with weights{p_end}
+{synopt:{cmd:e(estat_cmd)}}program used to implement {cmd:estat}{p_end}
+{synopt:{cmd:e(datasignature)}}the checksum{p_end}
+{synopt:{cmd:e(datasignaturevars)}}variables used in calculation of
+checksum{p_end}
 
-{p2col 5 20 24 2: Matrices}{p_end}
+{synoptset 24 tabbed}{...}
+{p2col 5 24 28 2: Matrices}{p_end}
 {synopt:{cmd:e(b)}}coefficient vector{p_end}
-{synopt:{cmd:e(V)}}variance-covariance matrix of the coefficients;
-{opt vce()} other than {cmd:none} only{p_end}
-{synopt:{cmd:e(boot_theta_all)}, {cmd:e(boot_beta_all)}}per-replicate
-{cmd:theta} and coefficient estimates; {cmd:vce(bootstrap)} only{p_end}
-{synopt:{cmd:e(boot_iter_all)}, {cmd:e(boot_outcome_all)}}per-replicate
-iteration counts and outcome codes (1=usable, 2=hit maxiter, 3=invalid
-theta, 4=invalid beta); {cmd:vce(bootstrap)} only{p_end}
+{synopt:{cmd:e(V)}}variance-covariance matrix of the estimators{p_end}
+{synopt:{cmd:e(V_modelbased)}}model-based variance ({cmd:vce(robust)},
+{cmd:vce(cluster)}){p_end}
+{synopt:{cmd:e(boot_theta_all)}}theta of each bootstrap replication{p_end}
+{synopt:{cmd:e(boot_beta_all)}}b of each bootstrap replication{p_end}
+{synopt:{cmd:e(boot_iter_all)}}EM iterations of each replication{p_end}
+{synopt:{cmd:e(boot_outcome_all)}}outcome of each replication (1 used, 2 not
+converged, 3 invalid theta, 4 invalid b){p_end}
+
+{synoptset 24 tabbed}{...}
+{p2col 5 24 28 2: Functions}{p_end}
+{synopt:{cmd:e(sample)}}marks estimation sample{p_end}
 {p2colreset}{...}
 
 
@@ -429,90 +636,107 @@ theta, 4=invalid beta); {cmd:vce(bootstrap)} only{p_end}
 {title:Methods and formulas}
 
 {pstd}
-{cmd:stcoxem} implements the EM algorithm of
-{help stcoxem##KleinRef:Klein (1992)} for a shared gamma-frailty Cox model.
-Given current parameter values, the E-step uses the closed-form
-gamma-Poisson posterior moments of each cluster's frailty, {cmd:E[u|data]}
-and {cmd:E[log u|data]}, computed from each cluster's cumulative hazard at
-its own covariates. The M-step re-maximizes an offset Cox partial
-likelihood, with the log posterior-mean frailty entered as an offset: the
-regression coefficients by Newton's method ({opt coxiter()} steps per
-cycle), and the Breslow baseline hazard in one O(n) risk-set sweep per
-stratum; {cmd:theta} is then updated by a stable Newton step on its own
-profile score. EM acceleration ({opt accelerate()}) extrapolates past
-several raw iterations to their implied fixed point.
+Let group i have frailty u_i ~ Gamma(1/theta, 1/theta), D_i failures, and
+cumulative hazard H_i = sum over its records of
+[H0(_t) - H0(_t0)] exp(xb). Given b, theta, and H0, the posterior of u_i is
+Gamma(1/theta + D_i, 1/theta + H_i).
 
 {pstd}
-Standard errors under {opt vce(oim)}/{opt vce(robust)} use a joint Louis
-(1982) EM-information decomposition for the regression coefficients and
-{cmd:theta} together (the complete-data beta/theta cross-information is
-exactly zero for this model, so only the missing-information term couples
-them). {cmd:theta}'s own missing-information term is exact; the coupling
-with the regression coefficients uses a first-order (delta-method)
-linearization. The resulting analytic SE for {cmd:theta} is a known,
-understood underestimate relative to fully efficient semiparametric
-estimators (the decomposition treats the nonparametric Breslow baseline as
-known -- see
-{help stcoxem##NielsenRef:Nielsen, Gill, Andersen, and Sørensen (1992)}),
-which is why the profile-likelihood SE ({opt plse}, which runs by default
-alongside {opt vce(oim)}/{opt vce(robust)}) or {opt plci}/{cmd:vce(bootstrap)}
-are the recommended sources for {cmd:theta}'s uncertainty. {opt vce(robust)}
-additionally reports a
-cluster-robust (Lin and Wei 1989) sandwich SE for the regression
-coefficients.
+E-step: E(u_i) = (1/theta + D_i)/(1/theta + H_i) and E(ln u_i) are computed
+in closed form.
+
+{pstd}
+M-step: b maximizes the Cox partial likelihood with offset ln E(u_i)
+({opt coxiter()} Newton steps); H0 is the Breslow estimator with the same
+offset, computed in one pass over the sorted risk sets per stratum; theta
+solves its own score equation, ln(theta) + digamma(1/theta) - 1 +
+mean[E(u_i) - E(ln u_i)] = 0, by a safeguarded Newton step. The algorithm
+is that of {help stcoxem##klein1992:Klein (1992)}; the fixed point is the
+maximum of the marginal likelihood with the Breslow baseline profiled out,
+which is the estimate {cmd:stcox, shared()} reports.
+
+{pstd}
+Log likelihood: with the Breslow increments dH0_k = d_k/S_k at the distinct
+failure times (d_k failures, S_k the risk-set sum of E(u) exp(xb)),
+
+{p 8 8 2}
+e(ll) = sum_i [ln Gamma(1/theta + D_i) - ln Gamma(1/theta) -
+(1/theta) ln(theta) - (1/theta + D_i) ln(1/theta + H_i)] +
+sum over failures of xb + sum_k d_k [ln(dH0_k) - ln(d_k) + 1],
+
+{pstd}
+that is, the marginal log likelihood with the baseline profiled out, minus
+the data-only constant sum_k d_k ln(d_k), plus the number of failures. This
+puts it on {cmd:stcox}'s scale, where the log likelihood equals the Breslow
+partial log likelihood as theta -> 0. With weights, D_i, d_k, and the sums
+are weighted.
+
+{pstd}
+Variance: under {cmd:vce(oim)}, the observed information of (b, theta) is
+the complete-data information minus the missing information (Louis 1982),
+evaluated at the EM solution. It treats the Breslow baseline as known, so
+it ignores the uncertainty in H0; for b this matters little, for theta it
+makes the standard error too small
+({help stcoxem##nielsen1992:Nielsen et al. 1992}). The profile-likelihood
+standard error of theta is 1/sqrt(-d2 pl(theta)/d theta2), where pl(theta)
+is the log likelihood maximized over b and H0 at fixed theta; the second
+derivative is computed by central differences at two step sizes with
+Richardson extrapolation. The robust variance of b is the
+{help stcoxem##linwei1989:Lin and Wei (1989)} sandwich with score residuals
+at the fitted frailties, summed within clusters, times G/(G-1).
+
+{pstd}
+Covariates are centred internally; b, theta, the log likelihood, and the
+variances do not change, and the baseline is transformed back to x=0.
+Collinearity is checked on the centred, scaled covariates. Tied times are
+ordered deterministically, so repeated fits give identical results.
 
 
 {marker references}{...}
 {title:References}
 
-{marker KleinRef}{...}
+{marker klein1992}{...}
 {phang}
 Klein, J. P. 1992. Semiparametric estimation of random effects using the
 Cox model based on the EM algorithm. {it:Biometrics} 48: 795-806.
 
+{marker linwei1989}{...}
 {phang}
 Lin, D. Y., and L. J. Wei. 1989. The robust inference for the Cox
 proportional hazards model. {it:Journal of the American Statistical
 Association} 84: 1074-1078.
 
+{marker louis1982}{...}
 {phang}
 Louis, T. A. 1982. Finding the observed information matrix when using the
 EM algorithm. {it:Journal of the Royal Statistical Society, Series B} 44:
 226-233.
 
-{marker NielsenRef}{...}
+{marker nielsen1992}{...}
 {phang}
-Nielsen, G. G., R. D. Gill, P. K. Andersen, and T. I. A. Sørensen. 1992. A
+Nielsen, G. G., R. D. Gill, P. K. Andersen, and T. I. A. Sorensen. 1992. A
 counting process approach to maximum likelihood estimation in frailty
 models. {it:Scandinavian Journal of Statistics} 19: 25-43.
 
+{marker varadhan2008}{...}
 {phang}
 Varadhan, R., and C. Roland. 2008. Simple and globally convergent methods
-for accelerating expectation-maximization algorithms. {it:Scandinavian
-Journal of Statistics} 35: 335-353.
+for accelerating the convergence of any EM algorithm.
+{it:Scandinavian Journal of Statistics} 35: 335-353.
 
 
-{marker examples}{...}
-{title:Examples}
+{marker author}{...}
+{title:Author}
 
-{pstd}Setup{p_end}
-{phang2}{cmd:. stset followup_years, enter(time 0) exit(time .) failure(outcome==1) id(patientid)}{p_end}
+{pstd}
+Barna Szabo-Soderberg{break}
+Karolinska Institutet, Stockholm, Sweden{break}
+{browse "https://github.com/szabobarnaKI/stcoxem"}
 
-{pstd}Fit a shared-frailty model, point estimates only (fastest){p_end}
-{phang2}{cmd:. stcoxem i.drug i.gender i.dm age_entry, shared(patientid) vce(none)}{p_end}
 
-{pstd}With model-based standard errors{p_end}
-{phang2}{cmd:. stcoxem i.drug i.gender i.dm age_entry, shared(patientid) vce(oim)}{p_end}
+{title:Also see}
 
-{pstd}Stratified by a third variable, with a profile-likelihood CI for theta{p_end}
-{phang2}{cmd:. stcoxem i.drug i.gender age_entry, shared(patientid) strata(dm) plci}{p_end}
-
-{pstd}With a pweight (set on {cmd:stset}, not on {cmd:stcoxem}){p_end}
-{phang2}{cmd:. stset followup_years [pweight=samplewt], enter(time 0) exit(time .) failure(outcome==1) id(patientid)}{p_end}
-{phang2}{cmd:. stcoxem i.drug i.gender i.dm age_entry, shared(patientid)}{p_end}
-
-{pstd}Cluster-bootstrap standard errors, 200 replications{p_end}
-{phang2}{cmd:. stcoxem i.drug i.gender i.dm age_entry, shared(patientid) vce(bootstrap) reps(200) bsseed(12345)}{p_end}
-
-{pstd}Save per-record baseline cumulative hazard and posterior mean frailty{p_end}
-{phang2}{cmd:. stcoxem i.drug i.gender i.dm age_entry, shared(patientid) generate(H0) ufrailty(uhat)}{p_end}
+{psee}
+Help: {help stcoxem postestimation}, {manhelp stcox ST},
+{manhelp stcox_postestimation ST:stcox postestimation}, {manhelp stset ST}
+{p_end}
